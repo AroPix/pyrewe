@@ -1,7 +1,7 @@
 # pyrewe
 API wrapper for the german grocery store REWE, to be able to order groceries through Python (WIP)
 
-(Code is very crappy so i'm very open to contributions)
+(Code is very crappy so i'm very open to contributions, not even error handling yet, lol)
 
 # How to use
 At the moment there is no Authentication implemented, so login on https://shop.rewe.de, open Chrome developer console (F12), 

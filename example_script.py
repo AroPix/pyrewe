@@ -65,7 +65,7 @@ def actions():
 
 
 def tui():
-    os.system('cls' if os.name == 'nt' else 'clear')
+    """Very very simple TUI (because TUI's are great)"""
     list_basket()
     actions()
 
