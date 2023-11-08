@@ -8,7 +8,12 @@ re = rewe(cookie)
 
 def prompter():
     search = input("What product do you want to search for?\n-> ")
-    products = re.get_products(str(search))['products']
+    products = re.get_products(str(search))
+    if 'products' in products:
+        products = products['products']
+    else:
+        print('No products found!')
+        prompter()
     index = 0
     for item in products:
         index += 1
@@ -17,8 +22,10 @@ def prompter():
             discount = item['discount']
             string += f' | DISCOUNT: -{str(discount).replace(".", ",")}%'
         print(string)
-    selection = int(input('\nSelect the product you want to add to the basket\n-> '))
-    s = int(selection - 1)
+    selection = input('\nSelect the product you want to add to the basket\n-> ')
+    if isinstance(selection, int) is False:
+        prompter()
+    s = int(selection) - 1
     prompt = input(
         f"\nDo you really want to add:\n{products[s]['name']} for {products[s]['price'] / 100} €? [y/n]\n-> ")
     match prompt:
