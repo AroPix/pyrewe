@@ -12,8 +12,12 @@ def prompter():
     index = 0
     for item in products:
         index += 1
-        print(f'[{index}] ' + item['name'] + ': ' + str(item['price'] / 100) + '€')
-    selection = int(input('\nSelect the product you want to add to the cart\n-> '))
+        string = f'[{index}] ' + item['name'] + ': ' + str(item['price'] / 100) + '€'
+        if 'discount' in item:
+            discount = item['discount']
+            string += f' | DISCOUNT: -{str(discount).replace(".", ",")}%'
+        print(string)
+    selection = int(input('\nSelect the product you want to add to the basket\n-> '))
     s = int(selection - 1)
     prompt = input(
         f"\nDo you really want to add:\n{products[s]['name']} for {products[s]['price'] / 100} €? [y/n]\n-> ")
@@ -23,7 +27,7 @@ def prompter():
             data, status_code = re.add_to_basket(products[s]['listingId'], quantity)
             match status_code:
                 case 200:
-                    print("Added to card, starting from new...")
+                    print("Added to basket, starting from new...")
                 case _:
                     print(f"Error: {status_code}\nData: {data}")
         case "n":
@@ -45,7 +49,10 @@ def list_basket():
             price_per = f"{str(item['listing']['pricing']['currentPrice'] / 100).replace('.', ',')}€/{item['listing']['pricing']['grammage']}"
         else:
             price_per = f"{str(item['listing']['pricing']['basePrice']['value'] / 100).replace('.', ',')}€/{item['listing']['pricing']['basePrice']['measure']['uom']}"
+        if 'discount' in item['listing']['pricing']:
+            price_per += ' | DISCOUNT: -{}%'.format(str(item['listing']['pricing']['discount']['discountRate']).replace(".", ","))
         print(f'[{index}]: {name} | Price: {price} € | Quantity: {quantity} | PPM: {price_per}')
+    print('Total price: ' + str(items['totalPrice']/100).replace('.', ',') + ' €')
 
 
 def actions():
