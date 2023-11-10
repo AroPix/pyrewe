@@ -1,12 +1,14 @@
 import json
 
+import cloudscraper
 import requests
+from bs4 import BeautifulSoup
 
 
 class rewe():
     def __init__(self, cookie=None, base_url="https://shop.rewe.de"):
         self.base_url = base_url
-        self.request = requests.session()
+        self.request = cloudscraper.create_scraper()
         if cookie is not None:
             self.cookie = cookie
             self.request.headers = {
@@ -93,3 +95,31 @@ class rewe():
         response = self.set_basket_quantity("13-4001052136019-f75dc7b0-fe2b-3e7c-b49b-3c9826eff156", 0)[0]
         self.basket_id = response['id']
         return response['id']
+
+
+def get_product_info_link(product_link: str):
+    """Don't use, might trigger Cloudflare"""
+    url = product_link
+    scraper = cloudscraper.create_scraper()
+
+    html = scraper.get(url).text
+    soup = BeautifulSoup(html, "html.parser")
+    try:
+        product_info = soup.find_all('script', type='application/json', id=lambda value: value and value.startswith("pdpr-propstore"))[0].text
+    except:
+        print(html)
+    return json.loads(product_info)
+
+def get_product_infos(listingIds: list) -> dict:
+    url = "https://shop.rewe.de/api/product-tiles?serviceTypes=PICKUP&listingIds="
+    for listingId in listingIds:
+        url += listingId + ','
+    url = url[:-1]
+
+    requests.get(url)
+
+    return requests.get(url).json()
+
+def off_info(gtin: str):
+    response = requests.get(f"https://world.openfoodfacts.net/api/v3/product/{gtin}?lc=de&cc=de&tags_lc=de&fields=attribute_groups")
+    return response.json()
