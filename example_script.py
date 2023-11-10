@@ -1,8 +1,9 @@
 import os
 
 from pyrewe import rewe
+import pyrewe
 
-cookie = '<no authentication implemented yet, so grab cookie from Chrome request>'
+cookie = '<copy the cookie from a network request, as there is no authentication yet>'
 re = rewe(cookie)
 
 
@@ -15,9 +16,30 @@ def prompter():
         print('No products found!')
         prompter()
     index = 0
+    listingIds = []
     for item in products:
+        listingIds.append(item['listingId'])
+    info = pyrewe.get_product_info_json(listingIds)
+    for item in products:
+        off = ' | '
+
+        for product in info:
+            if product['listingId'] == item['listingId']:
+                tile_info = product
+
+        off_info = pyrewe.off_info(tile_info['gtin'])
+        if 'product' in off_info:
+            off += off_info['product']['attribute_groups'][0]['attributes'][0]['title']
+        for nutrients in tile_info['nutritionFacts'][0]['nutrientInformation']:
+            nutrientType_text = nutrients['nutrientType']['text']
+            quantity = str(nutrients['quantityContained']['value']).replace('.', ',')
+            uom = nutrients['quantityContained']['uomShortText']
+
+            off += f'\n             {nutrientType_text}: {quantity} {uom}'
+        off += '\n'
+
         index += 1
-        string = f'[{index}] ' + item['name'] + ': ' + str(item['price'] / 100) + '€'
+        string = f'[{index}] ' + item['name'] + ': ' + str(item['price'] / 100) + '€' + off
         if 'discount' in item:
             discount = item['discount']
             string += f' | DISCOUNT: -{str(discount).replace(".", ",")}%'
